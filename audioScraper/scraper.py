@@ -18,6 +18,7 @@ def firstYouTubeID(title, artist):
     return getIdFromResponse(response.text)
 
 def downloadAudio(id, outputDirectory, title, artist, logFile):
+    logFile.write("DOWNLOADING: " + title + artist + id + "\n")
     outputFile = outputDirectory + '/' + ''.join(title.split()) + '-' + \
                  ''.join(artist.split()) + '.%(ext)s'
     args = ['yt-dlp', '-f', 'bestaudio', '-o', outputFile, id]
@@ -35,6 +36,9 @@ if __name__ == "__main__":
         with open(sys.argv[2] + "/log.txt", "w") as logFile:
             garbageFirstLine = songListFile.readline()
             for line in songListFile:
-                title, artist = line.strip().split(", ")
-                id = firstYouTubeID(title, artist)
-                downloadAudio(id, sys.argv[2], title, artist, logFile)
+                try:
+                    title, artist = line.strip().split(",")
+                    id = firstYouTubeID(title, artist)
+                    downloadAudio(id, sys.argv[2], title, artist, logFile)
+                except Exception as e:
+                    logFile.write("FAILED: " + title + artist + id + "\nException: " + str(Exception) + "\n")
