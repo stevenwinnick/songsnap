@@ -17,14 +17,13 @@ def firstYouTubeID(title, artist):
     response = requests.get(url, headers={'User-Agent': UserAgent().chrome})
     return getIdFromResponse(response.text)
 
-def downloadAudio(id, outputDirectory, title, artist):
+def downloadAudio(id, outputDirectory, title, artist, logFile):
     outputFile = outputDirectory + '/' + ''.join(title.split()) + '-' + \
                  ''.join(artist.split()) + '.%(ext)s'
     args = ['yt-dlp', '-f', 'bestaudio', '-o', outputFile, id]
-    output = subprocess.run(args)
+    output = subprocess.run(args, stdout=logFile)
     if output.returncode != 0:
-        with open("failures.txt", "a") as failures:
-            failures.write(title + artist + id + "\n")
+        logFile.write("FAILURE: " + title + artist + id + "\n")
 
 if __name__ == "__main__":
 
@@ -33,7 +32,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     with open(sys.argv[1], "r") as songListFile:
-        for line in songListFile:
-            title, artist = line.strip().split(", ")
-            id = firstYouTubeID(title, artist)
-            downloadAudio(id, sys.argv[2], title, artist)
+        with open(sys.argv[2] + "/log.txt", "w") as logFile:
+            garbageFirstLine = songListFile.readline()
+            for line in songListFile:
+                title, artist = line.strip().split(", ")
+                id = firstYouTubeID(title, artist)
+                downloadAudio(id, sys.argv[2], title, artist, logFile)
