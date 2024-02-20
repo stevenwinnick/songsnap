@@ -17,12 +17,12 @@ def firstYouTubeID(title, artist):
     response = requests.get(url, headers={'User-Agent': UserAgent().chrome})
     return getIdFromResponse(response.text)
 
-def downloadAudio(id, outputDirectory, title, artist, logFile):
+def downloadAudio(id, outputDirectory, title, artist, logFile, commandFile):
     logFile.write("DOWNLOADING: " + title + artist + id + "\n")
     outputFile = outputDirectory + '/' + ''.join(title.split()) + '-' + \
                  ''.join(artist.split()) + '.%(ext)s'
     args = ['yt-dlp', '-f', 'bestaudio', '-o', outputFile, id]
-    output = subprocess.run(args, stdout=logFile)
+    output = subprocess.run(args, stdout=commandFile, stderr=commandFile)
     if output.returncode != 0:
         logFile.write("FAILURE: " + title + artist + id + "\n")
 
@@ -34,11 +34,12 @@ if __name__ == "__main__":
 
     with open(sys.argv[1], "r") as songListFile:
         with open(sys.argv[2] + "/log.txt", "w") as logFile:
-            garbageFirstLine = songListFile.readline()
-            for line in songListFile:
-                try:
-                    title, artist = line.strip().split(",")
-                    id = firstYouTubeID(title, artist)
-                    downloadAudio(id, sys.argv[2], title, artist, logFile)
-                except Exception as e:
-                    logFile.write("FAILED: " + title + artist + id + "\nException: " + str(Exception) + "\n")
+            with open(sys.argv[2] + "/commands.txt", "w") as commandFile:
+                garbageFirstLine = songListFile.readline()
+                for line in songListFile:
+                    try:
+                        title, artist = line.strip().split(",")
+                        id = firstYouTubeID(title, artist)
+                        downloadAudio(id, sys.argv[2], title, artist, logFile, commandFile)
+                    except Exception as e:
+                        logFile.write("EXCEPTION: " + title + artist + id + "\nException: " + str(Exception) + "\n")
