@@ -42,4 +42,4 @@ if __name__ == "__main__":
                         id = firstYouTubeID(title, artist)
                         downloadAudio(id, sys.argv[2], title, artist, logFile, commandFile)
                     except Exception as e:
-                        logFile.write("EXCEPTION: " + title + artist + id + "\nException: " + str(Exception) + "\n")
+                        logFile.write("EXCEPTION: " + title + artist + id + "\nException: " + str(e) + "\n")
